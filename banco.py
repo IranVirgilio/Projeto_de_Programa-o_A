@@ -1,7 +1,7 @@
 class Cliente:
  
     def __init__(self, nome, cpf):
-        # O construtor.
+        
         self.nome = nome
         self.cpf = cpf
 
@@ -63,8 +63,7 @@ class Banco:
 # =====================================================================
 # INTERFACE DO TERMINAL
 # =====================================================================
-
-# Instanciamos o gestor principal do sistema
+
 meu_banco = Banco()
 opcao = 1
 
@@ -91,7 +90,7 @@ while opcao != 0:
         nome = input("Digite o nome do cliente: ")
         cpf = input("Digite o CPF: ")
         
-        # Criação do Objeto Cliente[cite: 13]
+       
         novo_cliente = Cliente(nome, cpf)
         meu_banco.adicionar_cliente(novo_cliente)
 
