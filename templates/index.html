@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Resumo do Banco</h2>
+<p>Bem-vindo ao painel de gestão do Banco POO.</p>
+
+<h3>Contas Cadastradas</h3>
+{% if contas %}
+    <table>
+        <tr>
+            <th>Número da Conta</th>
+            <th>Saldo Disponível</th>
+        </tr>
+        {% for conta in contas %}
+        <tr>
+            <td>{{ conta.id }}</td>
+            <!-- Formata o valor diretamente no HTML para manter as duas casas decimais -->
+            <td>R$ {{ "%.2f"|format(conta.saldo) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>Ainda não há contas cadastradas no sistema.</p>
+{% endif %}
+{% endblock %}

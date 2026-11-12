@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema Bancário POO</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; }
+        .navbar { background-color: #0056b3; color: white; padding: 15px 20px; text-align: center; }
+        .navbar a { color: white; text-decoration: none; margin: 0 15px; font-weight: bold; }
+        .container { max-width: 800px; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn { display: inline-block; padding: 10px 15px; background: #0056b3; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; }
+        .btn:hover { background: #004494; }
+        .alerta { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .alerta.sucesso { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alerta.erro { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>Banco Master</h2>
+        <a href="/">Página Inicial</a>
+        <a href="/cadastrar_conta">Cadastrar Conta</a>
+        <a href="/operacao/depositar">Depositar</a>
+        <a href="/operacao/sacar">Sacar</a>
+    </div>
+
+    <div class="container">
+        <!-- O Flask injeta alertas (mensagens de erro/sucesso) aqui -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alerta {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- O conteúdo das outras páginas entra aqui -->
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html

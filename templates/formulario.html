@@ -1,0 +1,26 @@
+{%extends 'base.html' %}
+
+{% block content %}
+<h2>{{ acao }}</h2>
+
+<form method="POST">
+    <div style="margin-bottom: 15px;">
+        <label for="id_conta">Número da Conta:</label><br>
+        <input type="text" id="id_conta" name="id_conta" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+    </div>
+    
+    {% if acao == 'Cadastrar Conta' %}
+    <div style="margin-bottom: 15px;">
+        <label for="saldo">Saldo Inicial (R$):</label><br>
+        <input type="text" id="saldo" name="saldo" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+    </div>
+    {% else %}
+    <div style="margin-bottom: 15px;">
+        <label for="valor">Valor da Operação (R$):</label><br>
+        <input type="text" id="valor" name="valor" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn">Confirmar Operação</button>
+</form>
+{% endblock %}
