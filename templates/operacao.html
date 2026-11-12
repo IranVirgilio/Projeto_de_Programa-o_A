@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>
+    {% if tipo == 'depositar' %}Realizar Depósito
+    {% elif tipo == 'sacar' %}Realizar Saque
+    {% elif tipo == 'transferir' %}Realizar Transferência
+    {% endif %}
+</h2>
+
+<form method="POST">
+    <div class="form-group">
+        <label for="numero_origem">
+            {% if tipo == 'transferir' %}Número da Conta de Origem:{% else %}Número da Conta:{% endif %}
+        </label>
+        <input type="text" id="numero_origem" name="numero_origem" required>
+    </div>
+
+    {% if tipo == 'transferir' %}
+    <div class="form-group">
+        <label for="numero_destino">Número da Conta de Destino:</label>
+        <input type="text" id="numero_destino" name="numero_destino" required>
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+        <label for="valor">Valor (R$):</label>
+        <input type="text" id="valor" name="valor" placeholder="Ex: 150.00" required>
+    </div>
+
+    <button type="submit" class="btn">Confirmar Operação</button>
+</form>
+{% endblock %}

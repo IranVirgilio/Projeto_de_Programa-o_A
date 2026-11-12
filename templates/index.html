@@ -1,25 +1,60 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Resumo do Banco</h2>
-<p>Bem-vindo ao painel de gestão do Banco POO.</p>
+<div class="card-patrimonio">
+    <h3 style="margin: 0 0 5px 0;">{{ agencia.nome }} — Agência Nº {{ agencia.numero }}</h3>
+    <p style="margin: 0; font-size: 18px;">
+        <strong>Patrimônio Total da Agência:</strong> R$ {{ "%.2f"|format(agencia.calcular_patrimonio_total()) }}
+    </p>
+</div>
 
-<h3>Contas Cadastradas</h3>
-{% if contas %}
+<h3>Contas Ativas na Agência</h3>
+{% if agencia.contas %}
     <table>
         <tr>
-            <th>Número da Conta</th>
-            <th>Saldo Disponível</th>
+            <th>Nº Conta</th>
+            <th>Tipo</th>
+            <th>Titular</th>
+            <th>CPF</th>
+            <th>Saldo</th>
+            <th>Ações</th>
         </tr>
-        {% for conta in contas %}
+        {% for conta in agencia.contas %}
         <tr>
-            <td>{{ conta.id }}</td>
-            <!-- Formata o valor diretamente no HTML para manter as duas casas decimais -->
+            <td>{{ conta.numero }}</td>
+            <td>{{ conta.tipo }}</td>
+            <td>{{ conta.titular.nome }}</td>
+            <td>{{ conta.titular.cpf }}</td>
             <td>R$ {{ "%.2f"|format(conta.saldo) }}</td>
+            <td>
+                <a href="/extrato/{{ conta.numero }}" class="btn btn-secundario">Ver Extrato</a>
+            </td>
         </tr>
         {% endfor %}
     </table>
 {% else %}
-    <p>Ainda não há contas cadastradas no sistema.</p>
+    <p>Nenhuma conta cadastrada nesta agência.</p>
+{% endif %}
+
+<h3>Clientes Cadastrados</h3>
+{% if clientes %}
+    <table>
+        <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Telefone</th>
+            <th>Salário</th>
+        </tr>
+        {% for cliente in clientes %}
+        <tr>
+            <td>{{ cliente.nome }}</td>
+            <td>{{ cliente.cpf }}</td>
+            <td>{{ cliente.telefone }}</td>
+            <td>R$ {{ "%.2f"|format(cliente.salario) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>Nenhum cliente cadastrado no sistema.</p>
 {% endif %}
 {% endblock %}

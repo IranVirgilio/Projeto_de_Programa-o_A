@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Extrato da Conta Nº {{ conta.numero }} ({{ conta.tipo }})</h2>
+<p><strong>Titular:</strong> {{ conta.titular.nome }} | <strong>CPF:</strong> {{ conta.titular.cpf }}</p>
+<p><strong>Saldo Atual:</strong> R$ {{ "%.2f"|format(conta.saldo) }}</p>
+
+<hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+
+<h3>Histórico de Transações</h3>
+{% if conta.historico_transacoes %}
+    <ul>
+        {% for item in conta.historico_transacoes %}
+            <li style="margin-bottom: 8px;">{{ item }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Nenhuma transação registrada nesta conta.</p>
+{% endif %}
+
+<br>
+<a href="/" class="btn">Voltar ao Início</a>
+{% endblock %}
