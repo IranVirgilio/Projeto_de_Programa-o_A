@@ -23,8 +23,8 @@
         <tr>
             <td>{{ conta.numero }}</td>
             <td>{{ conta.tipo }}</td>
-            <td>{{ conta.titular.nome }}</td>
-            <td>{{ conta.titular.cpf }}</td>
+            <td>{{ conta.cliente.nome }}</td>
+            <td>{{ conta.cliente.cpf }}</td>
             <td>R$ {{ "%.2f"|format(conta.saldo) }}</td>
             <td>
                 <a href="/extrato/{{ conta.numero }}" class="btn btn-secundario">Ver Extrato</a>

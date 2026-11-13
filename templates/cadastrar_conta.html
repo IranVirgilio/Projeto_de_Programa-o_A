@@ -4,8 +4,8 @@
 <h2>Abrir Nova Conta</h2>
 <form method="POST">
     <div class="form-group">
-        <label for="cpf_titular">Selecione o Cliente Titular:</label>
-        <select id="cpf_titular" name="cpf_titular" required>
+        <label for="cpf_cliente">Selecione o Cliente Titular:</label>
+        <select id="cpf_cliente" name="cpf_cliente" required>
             {% for cliente in clientes %}
                 <option value="{{ cliente.cpf }}">{{ cliente.nome }} (CPF: {{ cliente.cpf }})</option>
             {% endfor %}

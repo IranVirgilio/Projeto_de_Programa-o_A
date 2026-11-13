@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
+from abc import ABC, abstractmethod
 
 app = Flask(__name__)
 app.secret_key = "chave_secreta_banco_poo"
-
 
 class Cliente:
     def __init__(self, nome, cpf, salario, telefone):
@@ -11,73 +11,85 @@ class Cliente:
         self.salario = float(salario)
         self.telefone = telefone
 
-# 1. A SUPERCLASSE (Classe Mãe)
-class Conta:
-    def __init__(self, numero, saldo, titular):
+
+class Conta(ABC):
+    def __init__(self, numero, saldo, cliente):
         self.numero = numero
         self._saldo = float(saldo) 
-        self.titular = titular  
-        self.historico_transacoes = []  
+        self._cliente = cliente  
+        self._historico_transacoes = []  
 
         if self._saldo > 0:
-            self.historico_transacoes.append(f"Saldo inicial: +R$ {self._saldo:.2f}")
+            self._historico_transacoes.append(f"Saldo inicial: +R$ {self._saldo:.2f}")
 
     @property
     def saldo(self):
         return self._saldo
+        
+    @property
+    def cliente(self):
+        return self._cliente
 
     def depositar(self, valor, registrar=True):
         if valor > 0:
             self._saldo += valor
             if registrar:
-                self.historico_transacoes.append(f"Depósito: +R$ {valor:.2f}")
+                self._historico_transacoes.append(f"Depósito: +R$ {valor:.2f}")
             return True
         return False
 
     def sacar(self, valor, registrar=True):
-        # Regra padrão de saque (usada pela Poupança)
         if valor > 0 and self._saldo >= valor:
             self._saldo -= valor
             if registrar:
-                self.historico_transacoes.append(f"Saque: -R$ {valor:.2f}")
+                self._historico_transacoes.append(f"Saque: -R$ {valor:.2f}")
             return True
         return False
 
     def transferir(self, conta_destino, valor):
         if self.numero == conta_destino.numero:
             return False
-        # O Polimorfismo brilha aqui: se self for ContaCorrente, ele usará o sacar com limite!
         if self.sacar(valor, registrar=False):
             conta_destino.depositar(valor, registrar=False)
-            self.historico_transacoes.append(
-                f"Transferência enviada para Conta {conta_destino.numero}: -R$ {valor:.2f}"
+            self._historico_transacoes.append(
+                f"Transferência para Conta {conta_destino.numero}: -R$ {valor:.2f}"
             )
-            conta_destino.historico_transacoes.append(
-                f"Transferência recebida da Conta {self.numero}: +R$ {valor:.2f}"
+            conta_destino._historico_transacoes.append(
+                f"Transferência da Conta {self.numero}: +R$ {valor:.2f}"
             )
             return True
         return False
+        
+    def exibir_historico_saldo(self):
+        return self._historico_transacoes
 
 
 
 class ContaCorrente(Conta):
-    def __init__(self, numero, saldo, titular, limite=500.0):
-        super().__init__(numero, saldo, titular)
+    def __init__(self, numero, saldo, cliente, taxa_manutencao=15.0):
+        super().__init__(numero, saldo, cliente)
         self.tipo = "Corrente"
-        self.limite = limite
+        self.taxa_manutencao = float(taxa_manutencao)
 
-    def sacar(self, valor, registrar=True):
-        if valor > 0 and (self._saldo + self.limite) >= valor:
-            self._saldo -= valor
-            if registrar:
-                self.historico_transacoes.append(f"Saque (Usando Limite): -R$ {valor:.2f}")
+    def descontar_taxa(self):
+        if self._saldo >= self.taxa_manutencao:
+            self._saldo -= self.taxa_manutencao
+            self._historico_transacoes.append(f"Taxa de Manutenção: -R$ {self.taxa_manutencao:.2f}")
             return True
         return False
 
+
 class ContaPoupanca(Conta):
-    def __init__(self, numero, saldo, titular):
-        super().__init__(numero, saldo, titular)
+    def __init__(self, numero, saldo, cliente, taxa_rendimento=0.05):
+        super().__init__(numero, saldo, cliente)
         self.tipo = "Poupança"
+        self.taxa_rendimento = float(taxa_rendimento)
+
+    def aplicar_rendimento(self):
+        rendimento = self._saldo * self.taxa_rendimento
+        self._saldo += rendimento
+        self._historico_transacoes.append(f"Rendimento Aplicado: +R$ {rendimento:.2f}")
+        return True
 
 
 class Agencia:
@@ -112,6 +124,7 @@ def validar_numero_decimal(texto):
     texto_limpo = texto.strip().replace(",", ".")
     return texto_limpo.replace(".", "", 1).isdigit()
 
+
 @app.route("/")
 def index():
     return render_template("index.html", agencia=agencia_unica, clientes=clientes_cadastrados)
@@ -145,21 +158,20 @@ def cadastrar_conta():
 
     if request.method == "POST":
         numero, saldo = request.form["numero"].strip(), request.form["saldo"].strip()
-        tipo, cpf_titular = request.form["tipo"], request.form["cpf_titular"]
+        tipo, cpf_cliente = request.form["cpf_cliente"], request.form["cpf_cliente"]
 
         if agencia_unica.buscar_conta(int(numero)):
             flash("Número de conta já existe!", "erro")
             return redirect(url_for("cadastrar_conta"))
 
-        titular = buscar_cliente(cpf_titular)
+        cliente_encontrado = buscar_cliente(cpf_cliente)
         saldo_float = float(saldo.replace(",", "."))
         numero_int = int(numero)
 
-        # APLICAÇÃO PRÁTICA: O sistema decide qual objeto criar
         if tipo == "Corrente":
-            nova_conta = ContaCorrente(numero_int, saldo_float, titular) # Tem limite padrão de R$500
+            nova_conta = ContaCorrente(numero_int, saldo_float, cliente_encontrado)
         else:
-            nova_conta = ContaPoupanca(numero_int, saldo_float, titular) # Não tem limite
+            nova_conta = ContaPoupanca(numero_int, saldo_float, cliente_encontrado)
 
         agencia_unica.adicionar_conta(nova_conta)
         flash(f"Conta {tipo} criada com sucesso!", "sucesso")
@@ -198,7 +210,9 @@ def operacao(tipo):
 @app.route("/extrato/<int:numero>")
 def extrato(numero):
     conta = agencia_unica.buscar_conta(numero)
-    return render_template("extrato.html", conta=conta)
+    # Mostramos o extrato aproveitando o novo método exigido
+    historico = conta.exibir_historico_saldo() 
+    return render_template("extrato.html", conta=conta, historico=historico)
 
 if __name__ == "__main__":
     app.run(debug=True)
